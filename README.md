@@ -1,54 +1,20 @@
-# React + TypeScript + Vite
+## 一个简单的web音乐播放器
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### 简介
 
-Currently, two official plugins are available:
+本项目只是一个简单的web音乐播放器，仅作为自己的艺术表达🤔，没什么实际用途😅 
+项目使用react+vite+ts+tailwindcss构建，使用的都是我新学习的技术栈，也就当作练手了
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 技术栈
 
-## Expanding the ESLint configuration
+react v19.1.0
+tailwindcss v4.1.8
+vite v6.3.5
+typescript v5.8.3
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 核心功能
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- 歌曲播放
+- 歌曲封面图显示
+- 歌词显示
+- 音频显示
