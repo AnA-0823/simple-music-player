@@ -8,6 +8,7 @@
 ### 技术栈
 
 react v19.1.0
+react router v7.6.2
 tailwindcss v4.1.8
 vite v6.3.5
 typescript v5.8.3
