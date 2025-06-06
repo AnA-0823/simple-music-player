@@ -61,7 +61,7 @@ const MusicControls: React.FC<MusicControlsProps> = ({audioRef, onPrev, onNext, 
 
     return (
         <div
-            className="relative w-full h-30 xs:w-sm md:w-md rounded-3xl backdrop-blur-sm bg-black/40 z-0 flex flex-col items-center justify-center gap-2"
+            className="relative w-full h-30 xs:max-w-sm md:max-w-md rounded-3xl backdrop-blur-sm bg-black/40 z-0 flex flex-col items-center justify-center gap-2"
             style={{
                 color: color
             }}>

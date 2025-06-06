@@ -49,7 +49,7 @@ const LyricDisplay: React.FC<LyricDisplayProps> = ({lrcText, currentTime}) => {
     }, [currentTime, lyrics]);
 
     return (
-        <div className="text-3xl font-semibold h-20 text-nowrap">
+        <div className="w-full text-3xl font-semibold h-20 text-nowrap">
             {
                 lyrics.length > 0 && currentIndex >= 0 && currentIndex < lyrics.length &&
                 (<>

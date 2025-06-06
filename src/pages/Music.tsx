@@ -174,20 +174,23 @@ const Music: React.FC = () => {
                     }
                     style={{
                         color: dominantColor,
-                    }}>
-                    <div className="relative w-full xs:w-sm md:w-md aspect-[3/4] flex flex-col justify-between">
+                    }}
+                >
+                    <div
+                        className="relative w-full xs:max-w-sm md:max-w-md aspect-[3/4] flex flex-col justify-between">
                         {lrcText ? <LyricDisplay lrcText={lrcText} currentTime={currentTime}/> :
-                            <div className="h-20"/>}
+                            <div className="w-full h-20"/>}
 
-                        <div className="mb-8 font-semibold">
+                        <div className="w-full mb-8 font-semibold">
                             <TimeDisplay currentTime={currentTime}/>
                             <p className="text-8xl mb-4 mt-4">{songTitle}</p>
                             <p className="text-4xl">{songArtist}</p>
                         </div>
 
-                        <canvas ref={canvasRef}></canvas>
+                        <canvas className="w-full" ref={canvasRef}></canvas>
                     </div>
-                    <div className="relative w-full xs:w-sm md:w-md md:aspect-[3/4] flex flex-col justify-between">
+                    <div
+                        className="relative w-full xs:max-w-sm md:max-w-md md:aspect-[3/4] flex flex-col justify-between">
                         <img
                             className={"hidden md:block rounded-3xl w-full aspect-square object-cover object-center"}
                             src={coverUrl}
@@ -208,12 +211,14 @@ const Music: React.FC = () => {
                     }
                     style={{
                         color: dominantColor,
-                    }}>
+                    }}
+                >
                     <div
-                        className="relative w-full xs:w-sm md:w-md aspect-[3/4] rounded-3xl bg-center bg-cover overflow-hidden"
+                        className="relative w-full xs:max-w-sm md:max-w-md aspect-[3/4] rounded-3xl bg-center bg-cover overflow-hidden"
                         style={{
                             backgroundImage: `url(${coverUrl})`,
-                        }}>
+                        }}
+                    >
                         <div
                             className={"absolute h-1/5 w-full bottom-0 backdrop-blur-sm bg-black/30 z-0 " +
                                 "flex flex-col justify-center items-center"}>
@@ -221,7 +226,8 @@ const Music: React.FC = () => {
                         </div>
                     </div>
                     <div
-                        className="relative w-full xs:w-sm md:w-md md:aspect-[3/4] flex flex-col justify-between">
+                        className="relative w-full xs:max-w-sm md:max-w-md md:aspect-[3/4] flex flex-col justify-between"
+                    >
                         <div className="hidden md:block mt-4 text-3xl font-semibold text-center">『每日歌单』</div>
                         <div className="hidden md:block text-center font-semibold mb-8">
                             <p className="text-9xl mb-8">{songTitle}</p>

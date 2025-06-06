@@ -1,6 +1,7 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
-
+import FileInput from "@/components/FileInput.tsx";
+import avatar from "@/assets/avatar.png";
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -39,59 +40,59 @@ const Home: React.FC = () => {
     }
 
     const gotoMusic = () => {
+        if (!musicFile) {
+            alert("请选择音频文件")
+            return;
+        }
         navigate('/music', {state: {musicFile, lrcFile, backgroundFile, coverFile}});
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-100 to-white p-4">
-            <div className="bg-white shadow-xl rounded-2xl p-8 max-w-md w-full space-y-6">
-                <h1 className="text-2xl font-bold text-center text-gray-800">🎵 音乐播放器配置</h1>
+        <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-[#041d2b] p-4 gap-10">
+            <div
+                className="bg-[#081621] shadow-xl rounded-3xl p-8 w-full max-w-md aspect-[3/4] flex flex-col justify-between">
+                <img src={avatar} alt="头像" className="w-full aspect-square rounded-xl"/>
+                <div className="text-[#b9c4c2] text-center">
+                    <h1 className="text-white text-4xl font-semibold text-center mb-8">web音乐播放器</h1>
+                    <p>一个简单的web音乐播放器</p>
+                    <p>使用react+tailwind+ts+vite构建</p>
+                </div>
+            </div>
+            <div
+                className="bg-[#081621] shadow-xl rounded-3xl p-8 max-w-md w-full aspect-[3/4] text-white flex flex-col justify-between">
+                <h1 className="text-4xl font-bold text-center">播放器配置</h1>
 
-                <div>
-                    <label className="block mb-1 font-medium text-gray-700">选择音乐文件</label>
-                    <input
-                        type="file"
-                        accept="audio/*"
+                <div className="space-y-6">
+                    <FileInput
+                        labText="选择音乐文件"
+                        acceptFileType="audio/*"
                         onChange={handleMusicFileChange}
-                        className="w-full file:py-2 file:px-4 file:border-0 file:rounded-md file:bg-blue-500 file:text-white file:cursor-pointer"
                     />
-                </div>
 
-                <div>
-                    <label className="block mb-1 font-medium text-gray-700">选择歌词文件</label>
-                    <input
-                        type="file"
-                        accept=".lrc"
+                    <FileInput
+                        labText="选择歌词文件"
+                        acceptFileType=".lrc"
                         onChange={handleLrcFileChange}
-                        className="w-full file:py-2 file:px-4 file:border-0 file:rounded-md file:bg-blue-500 file:text-white file:cursor-pointer"
                     />
-                </div>
 
-                <div>
-                    <label className="block mb-1 font-medium text-gray-700">选择背景图（默认使用歌曲封面图）</label>
-                    <input
-                        type="file"
-                        accept="image/*"
+                    <FileInput
+                        labText="选择背景图（默认使用歌曲封面图）"
+                        acceptFileType="image/*"
                         onChange={handleBackgroundFileChange}
-                        className="w-full file:py-2 file:px-4 file:border-0 file:rounded-md file:bg-blue-500 file:text-white file:cursor-pointer"
                     />
-                </div>
 
-                <div>
-                    <label className="block mb-1 font-medium text-gray-700">选择封面图（默认使用歌曲封面图）</label>
-                    <input
-                        type="file"
-                        accept="image/*"
+                    <FileInput
+                        labText="选择封面图（默认使用歌曲封面图）"
+                        acceptFileType="image/*"
                         onChange={handleCoverFileChange}
-                        className="w-full file:py-2 file:px-4 file:border-0 file:rounded-md file:bg-blue-500 file:text-white file:cursor-pointer"
                     />
                 </div>
 
                 <button
                     onClick={gotoMusic}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+                    className="w-full bg-green-500 hover:bg-green-600 text-[#041d2b] font-semibold py-2 px-4 rounded-sm hover:rounded-3xl transition-all ease duration-500"
                 >
-                    🎬 开始播放
+                    开始播放
                 </button>
             </div>
         </div>
