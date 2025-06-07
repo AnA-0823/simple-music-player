@@ -1,11 +1,13 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {parseBlob} from "music-metadata-browser";
 import {Buffer} from "buffer";
 import MusicControls from "@/components/MusicControls.tsx";
 import LyricDisplay from "@/components/LyricDisplay.tsx";
 import TimeDisplay from "@/components/TimeDisplay.tsx";
+import MusicVisualizer from "@/components/MusicVisualizer.tsx";
 import {Vibrant} from "node-vibrant/browser";
+import type {MusicAndLrcFile} from "@/interface/MusicAndLrcFile.ts";
 
 declare global {
     interface Window {
@@ -17,11 +19,9 @@ window.Buffer = Buffer;
 
 const Music: React.FC = () => {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const musicFile = location.state?.musicFile as File;
-    const lrcFile = location.state?.lrcFile as File;
+    const files = location.state?.files as MusicAndLrcFile[];
     const backgroundFile = location.state?.backgroundFile as File;
     const coverFile = location.state?.coverFile as File;
 
@@ -34,76 +34,55 @@ const Music: React.FC = () => {
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [lrcText, setLrcText] = useState<string>('');
     const [dominantColor, setDominantColor] = useState<string>('');
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-    const onPrev = () => console.log("上一首 待实现");
-    const onNext = () => console.log("下一首 待实现");
-
-    const drawAudioCanvas = (audio: HTMLAudioElement, color: string) => {
-        const canvas = canvasRef.current!;
-        const ctx = canvas.getContext("2d")!;
-        canvas.width = 448;
-        canvas.height = 200;
-
-        const audioCtx = new AudioContext();
-        const source = audioCtx.createMediaElementSource(audio);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-
-        const draw = () => {
-            requestAnimationFrame(draw);
-            analyser.getByteFrequencyData(dataArray);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const barWidth = (canvas.width / bufferLength) * 1.5;
-            let x = 0;
-            for (let i = 0; i < bufferLength; i++) {
-                const barHeight = dataArray[i] * 0.75;
-                ctx.fillStyle = color;
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 1;
-            }
-        };
-
-        draw();
-    }
+    const onPrev = useCallback(() => {
+        if (currentIndex == 0) return;
+        setCurrentIndex(currentIndex - 1);
+    }, [currentIndex])
+    const onNext = useCallback(() => {
+        if (currentIndex == files.length - 1) return;
+        setCurrentIndex(currentIndex + 1);
+    }, [currentIndex, files.length])
 
     useEffect(() => {
-        if (!musicFile) {
+        if (!files) {
             navigate("/home");
             return;
         }
-        const objectUrl = URL.createObjectURL(musicFile);
+        const musicObjectUrl = URL.createObjectURL(files[currentIndex].musicFile);
 
         const audio = audioRef.current!;
-        audio.src = objectUrl;
+        audio.src = musicObjectUrl;
 
         const onTimeUpdate = () => setCurrentTime(audio.currentTime);
         const onPlay = () => setIsPlaying(true);
         const onPause = () => setIsPlaying(false);
+        const onEnded = () => {
+            onNext();
+            setIsPlaying(true);
+        }
 
         audio.addEventListener("timeupdate", onTimeUpdate)
         audio.addEventListener('play', onPlay);
         audio.addEventListener('pause', onPause);
+        audio.addEventListener('ended', onEnded);
 
 
-        const init = async () => {
-            const {common} = await parseBlob(musicFile);
+        let coverImageUrl: string = '';
+        let coverFileUrl: string = '';
+        let backgroundFileUrl: string = '';
 
+        parseBlob(files[currentIndex].musicFile).then(({common}) => {
             const picture = common.picture?.[0];
-            let coverImageUrl: string = ''
             if (picture) {
                 const blob = new Blob([picture.data], {type: picture.format});
                 coverImageUrl = URL.createObjectURL(blob);
             }
 
             if (coverFile) {
-                setCoverUrl(URL.createObjectURL(coverFile));
+                coverFileUrl = URL.createObjectURL(coverFile);
+                setCoverUrl(coverFileUrl);
             } else {
                 setCoverUrl(coverImageUrl);
             }
@@ -111,12 +90,14 @@ const Music: React.FC = () => {
             let tempImageUrl;
             if (backgroundFile) {
                 tempImageUrl = URL.createObjectURL(backgroundFile);
+                backgroundFileUrl = tempImageUrl;
                 setBackgroundUrl(tempImageUrl);
             } else {
                 tempImageUrl = coverImageUrl;
                 setBackgroundUrl(coverImageUrl);
             }
-            const color = await Vibrant.from(tempImageUrl).getPalette()
+
+            Vibrant.from(tempImageUrl).getPalette()
                 .then((palette) => {
                     const hex = palette.LightMuted!.hex;
                     setDominantColor(hex);
@@ -132,21 +113,28 @@ const Music: React.FC = () => {
             const artist = common.artist!;
             setSongArtist(artist);
 
-            drawAudioCanvas(audio, color);
+        });
 
-            const lrcRaw = await lrcFile.text();
-            setLrcText(lrcRaw);
+        if (files[currentIndex].lrcFile) {
+            files[currentIndex].lrcFile.text().then(
+                (lrcRaw) => setLrcText(lrcRaw)
+            );
+        } else {
+            setLrcText('');
         }
 
-        init();
+        if (isPlaying) audio.play();
 
         return () => {
             audio.removeEventListener('timeupdate', onTimeUpdate);
             audio.removeEventListener('play', onPlay);
             audio.removeEventListener('pause', onPause);
-            URL.revokeObjectURL(objectUrl);
+            URL.revokeObjectURL(musicObjectUrl);
+            URL.revokeObjectURL(coverImageUrl);
+            URL.revokeObjectURL(coverFileUrl);
+            URL.revokeObjectURL(backgroundFileUrl);
         }
-    }, [musicFile, lrcFile, coverFile, backgroundFile, navigate]);
+    }, [files, currentIndex, coverFile, backgroundFile, navigate]);
 
     useEffect(() => {
         if (!backgroundUrl) return;
@@ -156,6 +144,29 @@ const Music: React.FC = () => {
             })
             .catch(console.error);
     }, [backgroundUrl]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code === "Space") {
+                e.preventDefault(); // 防止页面滚动等默认行为
+                if (!audioRef.current) return;
+
+                if (audioRef.current.paused) {
+                    audioRef.current.play();
+                    setIsPlaying(true);
+                } else {
+                    audioRef.current.pause();
+                    setIsPlaying(false);
+                }
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
 
     return (
         <>
@@ -177,7 +188,7 @@ const Music: React.FC = () => {
                     }}
                 >
                     <div
-                        className="relative w-full xs:max-w-sm md:max-w-md aspect-[3/4] flex flex-col justify-between">
+                        className="relative w-full xs:max-w-sm md:max-w-md md:aspect-[3/4] flex flex-col justify-between">
                         {lrcText ? <LyricDisplay lrcText={lrcText} currentTime={currentTime}/> :
                             <div className="w-full h-20"/>}
 
@@ -187,15 +198,15 @@ const Music: React.FC = () => {
                             <p className="text-4xl">{songArtist}</p>
                         </div>
 
-                        <canvas className="w-full" ref={canvasRef}></canvas>
+                        <MusicVisualizer audioRef={audioRef} color={dominantColor}/>
                     </div>
                     <div
                         className="relative w-full xs:max-w-sm md:max-w-md md:aspect-[3/4] flex flex-col justify-between">
-                        <img
+                        {coverUrl && <img
                             className={"hidden md:block rounded-3xl w-full aspect-square object-cover object-center"}
                             src={coverUrl}
                             alt="封面"
-                        />
+                        />}
                         <MusicControls
                             audioRef={audioRef}
                             onPrev={onPrev}

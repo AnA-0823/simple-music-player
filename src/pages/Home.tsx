@@ -2,19 +2,20 @@ import React from "react";
 import {useNavigate} from "react-router-dom";
 import FileInput from "@/components/FileInput.tsx";
 import avatar from "@/assets/avatar.png";
+import type {MusicAndLrcFile} from "@/interface/MusicAndLrcFile.ts";
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
 
-    let musicFile: File;
+    let musicFiles: FileList;
+    let lrcFiles: FileList;
     let backgroundFile: File;
     let coverFile: File;
-    let lrcFile: File;
 
-    const handleMusicFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleMusicFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files;
         if (selected) {
-            musicFile = selected[0];
+            musicFiles = selected;
         }
     }
 
@@ -32,19 +33,30 @@ const Home: React.FC = () => {
         }
     }
 
-    const handleLrcFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLrcFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files;
         if (selected) {
-            lrcFile = selected[0];
+            lrcFiles = selected;
         }
     }
 
     const gotoMusic = () => {
-        if (!musicFile) {
+        if (!musicFiles) {
             alert("请选择音频文件")
             return;
         }
-        navigate('/music', {state: {musicFile, lrcFile, backgroundFile, coverFile}});
+        const lrcFileArr = Array.from(lrcFiles || []);
+        const files: MusicAndLrcFile[] = [];
+        for (const musicFile of musicFiles) {
+            const fileFullName = musicFile.name;
+            const fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.'));
+            const lrcFile = lrcFileArr.find((value) => value.name === fileName + ".lrc");
+            files.push({musicFile: musicFile, lrcFile: lrcFile || null} as MusicAndLrcFile)
+        }
+        navigate('/music', {
+            state: {files, backgroundFile, coverFile}
+        })
+        ;
     }
 
     return (
@@ -66,13 +78,15 @@ const Home: React.FC = () => {
                     <FileInput
                         labText="选择音乐文件"
                         acceptFileType="audio/*"
-                        onChange={handleMusicFileChange}
+                        isMultiple={true}
+                        onChange={handleMusicFilesChange}
                     />
 
                     <FileInput
-                        labText="选择歌词文件"
+                        labText="选择歌词文件（歌词文件要与音乐文件同名）"
                         acceptFileType=".lrc"
-                        onChange={handleLrcFileChange}
+                        isMultiple={true}
+                        onChange={handleLrcFilesChange}
                     />
 
                     <FileInput
